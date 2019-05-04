@@ -19,7 +19,7 @@ def measure_tenant(tenant):
 def get_tenants_heaviest(tenants):
     return sorted(tenants, key=lambda x: measure_tenant(x), reverse=True)
 
-def get_tenants_lightiest(tenants):
+def get_tenants_lightest(tenants):
     return sorted(tenants, key=lambda x: measure_tenant(x))
 
 
@@ -29,18 +29,14 @@ def get_dcs_random(tenant, dcs):
     return shuffled
 
 def measure_dc(dc):
-    if "VCPUs" in dc.evaluation:
-        vcpus = dc.evaluation["VCPUs"]
-        ram = dc.evaluation["RAM"]
-        size = dc.evaluation["storage"]
-    else:
-        vcpus = sum((x["VCPUs"] for x in tenant.evaluation["vms"]))
-        ram = sum((x["RAM"] for x in tenant.evaluation["vms"]))
-        size = sum((x["size"] for x in tenant.evaluation["sts"]))
+    vcpus = dc.evaluation["VCPUs"]
+    ram = dc.evaluation["RAM"]
+    size = dc.evaluation["storage"]
+
     return (vcpus, ram, size)
 
 def get_dcs_emptiest(tenant, dcs):
-    return sorted(dcs, key=lambda x: measure_dc(x))
+    return sorted(dcs, key=lambda x: measure_dc(x), reverse=True)
 
 def get_dcs_utilized(tenant, dcs):
-    return sorted(dcs, key=lambda x: measure_dc(x), reverse=True)
+    return sorted(dcs, key=lambda x: measure_dc(x))

@@ -1,6 +1,9 @@
 from multiprocessing import Pool
 from subprocess import call, check_output
 import io
+import time
+
+from checking_results import utilization_dcs, placement_tenants
 
 def scheduler_exec(data):
     if data is None:
@@ -11,7 +14,7 @@ def scheduler_exec(data):
     f_prog = open("tmp/out_prog","wb")
 
     exec_path = "local_algo/yulia_algo"
-    # exec_path = "local_algo/true_andrei_algo"
+    exec_path = "local_algo/true_andrei_algo"
 
     call_data = [
         exec_path,
@@ -20,10 +23,37 @@ def scheduler_exec(data):
         "/dev/null",
     ]
 
-    call(call_data, stdout=f_prog, stderr=f_prog)
+    start_time = time.time()
 
+    call(call_data, stdout=f_prog, stderr=f_prog)
     f_prog.close()
-    return filename_out
+
+    elapsed_time = time.time() - start_time
+    return elapsed_time
+
+def batch(iterable, n=1):
+    l = len(iterable)
+    for ndx in range(0, l, n):
+        yield iterable[ndx:min(ndx + n, l)]
+
+def batched_algo(
+        batch_size,
+        iter_max,
+        dcs_per_tenant,
+        dcs,
+        tenants,
+        e,
+        strategy_choose_tenant,
+        strategy_choose_dc
+):
+    batches = batch(tenants, batch_size)
+    batch_results = []
+
+    for batch_tenants in batches:
+        batch_result = main_algo(iter_max, dcs_per_tenant, dcs, tenants, e, strategy_choose_tenant, strategy_choose_dc)
+        batch_results.append(batch_result)
+
+    return batch_results
 
 def main_algo(
         iter_max,
@@ -40,10 +70,11 @@ def main_algo(
     dict_dcs = {dc.name : dc for dc in dcs}
     dict_tenants = {tenant.name : tenant for tenant in tenants}
 
-
+    benchmarks = []
     tenants_processed = [x for x in tenants if x.mark is None]
     while len(tenants_processed) > 0 and iter_max > 0:
-        algo_step(
+        start_time = time.time()
+        _, timings = algo_step(
             dcs_per_tenant,
             dcs,
             tenants_processed,
@@ -54,11 +85,15 @@ def main_algo(
             dict_tenants
         )
 
+        elapsed_time = time.time() - start_time
+        benchmark = (placement_tenants(tenants), utilization_dcs(dcs), timings, elapsed_time)
+        benchmarks.append(benchmark)
+
         iter_max -= 1
         tenants_processed = [x for x in tenants if x.mark is None]
 
     everything_placed = all([x.mark is not None for x in tenants])
-    return iter_max, everything_placed
+    return benchmarks, everything_placed
 
 def algo_step(
     dcs_per_tenant,
@@ -94,8 +129,9 @@ def algo_step(
 
 
     exec_input = [x.pre_exec() for x in dcs]
+    filenames_out = [x[1] if x is not None else None for x in exec_input]
     with Pool(8) as p:
-        filenames_out = p.map(scheduler_exec, exec_input)
+        timings = p.map(scheduler_exec, exec_input)
     for dc, filename in zip(dcs, filenames_out):
         placements = dc.after_exec(filename)
         for placement, removings in placements:
@@ -114,7 +150,7 @@ def algo_step(
             strategy_choose_tenant
         )
 
-    return all([x.mark is not None for x in tenants])
+    return all([x.mark is not None for x in tenants]), timings
 
 def choose_placement(tenant, possible_placements, dict_dcs, dict_tenants, strategy_choose_dc, e, strategy_choose_tenant):
     if len(possible_placements) == 0:
@@ -165,7 +201,7 @@ def choose_placement(tenant, possible_placements, dict_dcs, dict_tenants, strate
 
         delete_placements(tenants_condition, dict_dcs, e)
 
-        placed_ok = algo_step(
+        placed_ok, timings = algo_step(
             len(other_dcs),
             other_dcs,
             tenants_condition,
@@ -175,6 +211,8 @@ def choose_placement(tenant, possible_placements, dict_dcs, dict_tenants, strate
             dict_dcs,
             dict_tenants
         )
+
+        # TODO: timings usage
 
         if placed_ok:
             tenant.set_placement(chosen_placement, chosen_dc, e)

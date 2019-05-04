@@ -1,5 +1,17 @@
+import json
+
 from collections import Counter
 from evaluators import Evaluator_sum
+
+def dump_experiment(benchmarks, filename):
+    with open(filename, "w") as f:
+        json.dump(benchmarks, f)
+
+def load_experiment(filename):
+    with open(filename, "r") as f:
+        result = json.load(f)
+
+    return result
 
 # def utilization_resources(elem, base):
 #     utilizations = []
@@ -35,7 +47,7 @@ def utilization_dcs(dcs):
         "vals": divs,
     }
 
-def tenants_placed(tenants):
+def placement_tenants(tenants):
     c = Counter()
     for tenant in tenants:
         if tenant.mark is not None:
