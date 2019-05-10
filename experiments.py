@@ -57,7 +57,7 @@ def iterations_algo(directory):
     dict_tenants = {tenant.name : tenant for tenant in tenants}
 
     start_time = time.time()
-    all_placed, timings = algo_step(
+    all_placed, timings, sendings = algo_step(
         dcs_per_tenant,
         dcs,
         tenants,
@@ -74,10 +74,22 @@ def iterations_algo(directory):
     into_directory(dcs, tenants, new_iteration_path)
 
     filename_timings = os.path.join(directory, "timings.csv")
-
+    local_time = ",".join([str(x) if x is not None else "" for x in timings])
+    line = "{},{},{}\n".format(last_iteration+1, elapsed_time, local_time)
     with open(filename_timings, "a") as f:
-        local_time = ",".join([str(x) if x is not None else "" for x in timings])
-        line = "{},{},{}\n".format(last_iteration+1, elapsed_time, local_time)
+        f.write(line)
+
+    filename_sendings = os.path.join(directory, "sendings.csv")
+    acceptings = []
+    for sending, dc in zip(sendings, dcs):
+        accepting = set(sending) - dc.names_rejected
+        acceptings.append(list(accepting))
+
+    line = [last_iteration+1, sendings, acceptings]
+
+    line = json.dumps(line) + "\n"
+
+    with open(filename_sendings, "a") as f:
         f.write(line)
 
 def iterations_view_timing(directory):
@@ -93,16 +105,13 @@ def iterations_view_timing(directory):
     return df, ax
 
 def iterations_view_timing_total(df):
-    worktime_total = df.iloc[:,0]
-    worktime_total = pd.DataFrame(worktime_total.reset_index(name="time"))
-    worktime_total["Оценка"] = "суммарно"
+    total = df.iloc[:, 0]
+    local = df.iloc[:, 1:].T.max()
+    df_main = pd.DataFrame({"локальные": local, "мета": total}).T
+    df_diff = df_main.diff()
+    df_diff.iloc[0] = df_main.iloc[0]
+    ax = df_diff.T.plot(kind='bar', stacked=True)
 
-    worktime_meta = df.iloc[:,0] - df.iloc[:,1:].T.max()
-    worktime_meta = pd.DataFrame(worktime_meta.reset_index(name="time"))
-    worktime_meta["Оценка"] = "только мета"
-
-    df_time = pd.concat([worktime_meta, worktime_total])
-    ax = sns.barplot(x="index", y="time", hue="Оценка", data=df_time)
     ax.set_xlabel("Номер итерации")
     ax.set_ylabel("Время работы")
 
@@ -133,8 +142,6 @@ def iterations_view_utilization(directory):
     return df, ax
 
 def iterations_view_placed(directory):
-    import pandas as pd
-
     iterations = [int(x) for x in os.listdir(directory) if x.isdigit()]
     iterations = sorted(iterations)
 
@@ -153,6 +160,49 @@ def iterations_view_placed(directory):
     ax = df_diff.T.plot(kind='bar', stacked=True)
     ax.set_xlabel("Номер ЦОД")
     ax.set_ylabel("Размещено запросов")
+
+    return df, ax
+
+def iterations_view_sent(directory):
+    import pandas as pd
+
+    # df = pd.DataFrame(columns=["sent", "placed", "iteration", "dc"])
+    df = pd.DataFrame(columns=["iteration", "dc", "mode", "count"])
+
+    with open(os.path.join(directory, "sendings.csv")) as f:
+        data = f.readlines()
+
+    data = [json.loads(x) for x in data]
+    for iteration in data:
+        for dc, sent, placed in zip(range(8), iteration[1], iteration[2]):
+            elem = {
+                "count": len(sent),
+                "mode": "sent",
+                "iteration": iteration[0],
+                "dc": dc+1,
+            }
+            df = df.append(elem, ignore_index=True)
+
+            elem = {
+                "count": len(placed),
+                "mode": "placed",
+                "iteration": iteration[0],
+                "dc": dc+1,
+            }
+            df = df.append(elem, ignore_index=True)
+
+
+    df_counts = df.groupby(["mode", "iteration"])["count"].sum().reset_index().iloc[:, 1:]
+    df_counts = pd.concat([
+        df_counts.loc[0:len(df_counts)/2-1].set_index("iteration").T,
+        df_counts.loc[len(df_counts)/2:].set_index("iteration").T
+    ]).reset_index().iloc[:, 1:]
+    df_counts.set_axis(["размещены", "не размещены"], inplace=True)
+    df_counts_diff = df_counts.diff()
+    df_counts_diff.iloc[0] = df_counts.iloc[0]
+    ax = df_counts_diff.iloc[::-1].T.plot(kind='bar', stacked=True)
+    ax.set_xlabel("Номер итерации")
+    ax.set_ylabel("Отправлено запросов")
 
     return df, ax
 
