@@ -5,15 +5,14 @@ from algo import main_algo
 from strategies import get_tenants_random, get_dcs_random
 
 from strategies import get_dcs_utilized, get_dcs_emptiest
-from strategies import get_tenants_heaviest, get_tenants_lightiest
+from strategies import get_tenants_heaviest, get_tenants_lightest
 
-from checking_results import utilization_dcs, tenants_placed
+from checking_results import utilization_dcs, placement_tenants
 
 import time
 
 if __name__ == '__main__':
-    dcs, tenants = from_directory("examples/dcs_loaded")
-    # dcs, tenants = from_directory("examples/returns")
+    dcs, tenants = from_directory("examples/dcs_empty_sorted")
 
     e = Evaluator_sum()
 
@@ -22,7 +21,7 @@ if __name__ == '__main__':
     elapsed_time = time.time() - start_time
     print("time elapsed", int(elapsed_time), "s")
 
-    tp = tenants_placed(tenants)
+    tp = placement_tenants(tenants)
     print("tenants: {}/{}".format(tp["placed"], tp["total"]))
     ud = utilization_dcs(dcs)
     print("utilization: \navg {}\nmax {}".format(ud["avg"], ud["max"]))
