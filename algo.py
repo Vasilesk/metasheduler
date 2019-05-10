@@ -74,7 +74,7 @@ def main_algo(
     tenants_processed = [x for x in tenants if x.mark is None]
     while len(tenants_processed) > 0 and iter_max > 0:
         start_time = time.time()
-        _, timings, _ = algo_step(
+        _, timings, _, _ = algo_step(
             dcs_per_tenant,
             dcs,
             tenants_processed,
@@ -129,7 +129,6 @@ def algo_step(
         if dcs_count != 0:
             tenant_placements[tenant.name] = []
 
-    # sendings = [x.name for y in dcs for x in y.tenants_try]
     sendings = []
     for dc in dcs:
         sendings.append([x.name for x in dc.tenants_try])
@@ -145,9 +144,14 @@ def algo_step(
             tenant_placements[placement["name"]].append((dc.name, placement, removings))
 
     # choose dc for tenant
+    returns_count = {
+        "yes": 0,
+        "no": 0,
+    }
+
     for name in tenant_placements:
         tenant = dict_tenants[name]
-        choose_placement(
+        success, returns = choose_placement(
             tenant,
             tenant_placements[name],
             dict_dcs,
@@ -156,12 +160,13 @@ def algo_step(
             e,
             strategy_choose_tenant
         )
+        returns_count["yes" if success else "no"] += returns
 
-    return all([x.mark is not None for x in tenants]), timings, sendings
+    return all([x.mark is not None for x in tenants]), timings, sendings, returns_count
 
 def choose_placement(tenant, possible_placements, dict_dcs, dict_tenants, strategy_choose_dc, e, strategy_choose_tenant):
     if len(possible_placements) == 0:
-        return False
+        return False, 0
 
     possible_dcs_names_unconditional = [x[0] for x in possible_placements if len(x[2]) == 0]
     possible_dcs_unconditional = [dict_dcs[x] for x in possible_dcs_names_unconditional]
@@ -181,14 +186,14 @@ def choose_placement(tenant, possible_placements, dict_dcs, dict_tenants, strate
         # chosen_dc.tenants_placed.append(tenant)
         # chosen_dc.evaluation = e.get_dc_evaluation(chosen_dc)
 
-        return True
+        return True, 0
 
     else:
         # # for no looking
         # return False
 
         if delta_conditional == 0:
-            return False
+            return False, 0
 
         print("ACCEPTED")
 
@@ -210,7 +215,7 @@ def choose_placement(tenant, possible_placements, dict_dcs, dict_tenants, strate
 
         delete_placements(tenants_condition, dict_dcs, e)
 
-        placed_ok, timings, sendings = algo_step(
+        placed_ok, timings, _, _ = algo_step(
             len(other_dcs),
             other_dcs,
             tenants_condition,
@@ -228,7 +233,7 @@ def choose_placement(tenant, possible_placements, dict_dcs, dict_tenants, strate
         else:
             set_placements(tenants_condition, placement_backup, e)
 
-        return placed_ok
+        return placed_ok, len(tenant_names_condition)
 
 def set_placements(tenants, placements, e):
     for tenant, placement in zip(tenants, placements):

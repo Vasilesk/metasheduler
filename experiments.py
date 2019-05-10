@@ -57,7 +57,7 @@ def iterations_algo(directory):
     dict_tenants = {tenant.name : tenant for tenant in tenants}
 
     start_time = time.time()
-    all_placed, timings, sendings = algo_step(
+    all_placed, timings, sendings, returns_count = algo_step(
         dcs_per_tenant,
         dcs,
         tenants,
@@ -77,6 +77,11 @@ def iterations_algo(directory):
     local_time = ",".join([str(x) if x is not None else "" for x in timings])
     line = "{},{},{}\n".format(last_iteration+1, elapsed_time, local_time)
     with open(filename_timings, "a") as f:
+        f.write(line)
+
+    filename_returns = os.path.join(directory, "returns.csv")
+    line = "{},{},{}\n".format(last_iteration+1, returns_count["yes"], returns_count["no"])
+    with open(filename_returns, "a") as f:
         f.write(line)
 
     filename_sendings = os.path.join(directory, "sendings.csv")
@@ -108,6 +113,7 @@ def iterations_view_timing_total(df):
     total = df.iloc[:, 0]
     local = df.iloc[:, 1:].T.max()
     df_main = pd.DataFrame({"локальные": local, "мета": total}).T
+    # , cols=["локальные", "мета"]
     df_diff = df_main.diff()
     df_diff.iloc[0] = df_main.iloc[0]
     ax = df_diff.T.plot(kind='bar', stacked=True)
@@ -139,6 +145,15 @@ def iterations_view_utilization(directory):
     ax.set_xlabel("Номер ЦОД")
     ax.set_ylabel("Загрузка ресурсов")
 
+    return df, ax
+
+def iterations_view_returned(directory):
+    filename =  os.path.join(directory, "returns.csv")
+    df = pd.read_csv(filename, names=["iteration", "переназначены", "не переназначены"])
+    df = df.set_index("iteration")
+    ax = df.plot(kind='bar', stacked=True)
+    ax.set_xlabel("Номер итерации")
+    ax.set_ylabel("Возвращаемых запросов")
     return df, ax
 
 def iterations_view_placed(directory):
