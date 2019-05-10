@@ -67,15 +67,15 @@ class DC:
                 print("PARTIAL ASSIGNING ERROR")
 
             if assigned:
-                removed_because = tenant_bs.get("removedBecause", None)
-                if removed_because is not None:
-                    caused_removes = removes.get(removed_because, [])
-                    caused_removes.append(tenant_bs["name"])
-                    removes[removed_because] = caused_removes
-
                 placed.append(tenant_bs)
             else:
                 not_placed.append(tenant_bs)
+
+            removed_because = tenant_bs.get("removedBecause", None)
+            if removed_because is not None:
+                caused_removes = removes.get(removed_because, [])
+                caused_removes.append(tenant_bs["name"])
+                removes[removed_because] = caused_removes
 
         placed = [(x, removes.get(x["name"], [])) for x in placed]
 
@@ -102,11 +102,22 @@ class DC:
 
         placed, not_placed = self.parse_output(filename_out)
 
-        new_rejects = set([x["name"] for x in not_placed])
+        names_placed_before = set([x.name for x in self.tenants_placed])
+
+        new_rejects = set([x["name"] for x in not_placed]) - names_placed_before
         self.names_rejected |= new_rejects
 
         tries = set([x.name for x in self.tenants_try])
-        new_possible = [x for x in placed if x[0]["name"] in tries]
+
+        new_possible = []
+        for bs, rem in placed:
+            if bs["name"] in tries:
+                len_old = len(rem)
+                rem = [x for x in rem if x in names_placed_before]
+                new_possible.append((bs, rem))
+                len_new = len(rem)
+                if len_new != len_old:
+                    print("smth was deleted, new len is", len_new)
 
         self.tenants_try = []
 

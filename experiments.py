@@ -10,11 +10,11 @@ from checking_results import load_experiment, dump_experiment
 
 import os
 
-def view_dc_utilization(s_evaluator, s_tenant_strategy, s_dc_strategy):
+def view_dc_utilization(algo, dataset, s_evaluator, s_tenant_strategy, s_dc_strategy):
     import seaborn as sns
     import pandas as pd
 
-    path = "experiments/andrei/empty800/{}/{}/{}".format(s_evaluator, s_tenant_strategy, s_dc_strategy)
+    path = "experiments/{}/{}/{}/{}/{}".format(algo, dataset, s_evaluator, s_tenant_strategy, s_dc_strategy)
     filename = os.path.join(path, "benchmark.json")
     benchmarks = load_experiment(filename)
     df = []
@@ -29,11 +29,11 @@ def view_dc_utilization(s_evaluator, s_tenant_strategy, s_dc_strategy):
     df = pd.DataFrame().from_records(df)
     return sns.barplot(x="номер ЦОД", y="загрузка ресурсов (%)", hue="итераций", data=df)
 
-def view_tenants_placed(s_evaluator, s_tenant_strategy, s_dc_strategy):
+def view_tenants_placed(algo, dataset, s_evaluator, s_tenant_strategy, s_dc_strategy):
     import seaborn as sns
     import pandas as pd
 
-    path = "experiments/andrei/empty800/{}/{}/{}".format(s_evaluator, s_tenant_strategy, s_dc_strategy)
+    path = "experiments/{}/{}/{}/{}/{}".format(algo, dataset, s_evaluator, s_tenant_strategy, s_dc_strategy)
     filename = os.path.join(path, "benchmark.json")
     benchmarks = load_experiment(filename)
     df = []
@@ -52,9 +52,37 @@ def view_tenants_placed(s_evaluator, s_tenant_strategy, s_dc_strategy):
     df = pd.DataFrame().from_records(df)
     return sns.barplot(x="номер ЦОД", y="размещено запросов", hue="итераций", data=df)
 
+def experiment_run(algo, dataset_from, store_to, tenants_used, tenants_to_use, s_evaluator, s_tenant_strategy, s_dc_strategy):
+    map_evaluator = {
+        "naive": Evaluator_naive,
+        "sum": Evaluator_sum,
+        "detailed": Evaluator_detailed,
+    }
+    map_tenant = {
+        "tenant_random": get_tenants_random,
+        "tenant_heaviest": get_tenants_heaviest,
+        "tenant_lightest": get_tenants_lightest,
+    }
+    map_dc = {
+        "dc_random": get_dcs_random,
+        "dc_utilized": get_dcs_utilized,
+        "dc_emptiest": get_dcs_emptiest,
+    }
 
+    e = map_evaluator[s_evaluator]()
 
-def empty_experiment_run(s_evaluator, s_tenant_strategy, s_dc_strategy):
+    dcs, tenants = from_directory(os.path.join("examples", dataset_from))
+    tenants1, tenants2 = tenants[:tenants_used], tenants[tenants_used:]
+
+    tenants_for_run = [x for x in tenants1 if x.mark is not None] + tenants2[:tenants_to_use]
+
+    benchmarks, _ = main_algo(3, 1, dcs, tenants_for_run, e, map_tenant[s_tenant_strategy], map_dc[s_dc_strategy])
+
+    path = "experiments/{}/{}/{}/{}/{}".format(algo, store_to, s_evaluator, s_tenant_strategy, s_dc_strategy)
+    dump_experiment(benchmarks, os.path.join(path, "benchmark.json"))
+    into_directory(dcs, tenants, os.path.join(path, "data"))
+
+def empty_experiment_run(algo, s_evaluator, s_tenant_strategy, s_dc_strategy):
     map_evaluator = {
         "naive": Evaluator_naive,
         "sum": Evaluator_sum,
@@ -78,6 +106,6 @@ def empty_experiment_run(s_evaluator, s_tenant_strategy, s_dc_strategy):
 
     benchmarks, _ = main_algo(3, 1, dcs, tenants1, e, map_tenant[s_tenant_strategy], map_dc[s_dc_strategy])
 
-    path = "experiments/andrei/empty800/{}/{}/{}".format(s_evaluator, s_tenant_strategy, s_dc_strategy)
+    path = "experiments/{}/empty800/{}/{}/{}".format(algo, s_evaluator, s_tenant_strategy, s_dc_strategy)
     dump_experiment(benchmarks, os.path.join(path, "benchmark.json"))
     into_directory(dcs, tenants, os.path.join(path, "data"))

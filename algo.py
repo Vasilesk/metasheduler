@@ -13,8 +13,8 @@ def scheduler_exec(data):
 
     f_prog = open("tmp/out_prog","wb")
 
-    exec_path = "local_algo/yulia_algo"
-    exec_path = "local_algo/true_andrei_algo"
+    exec_path = "local_algo/9_algo"
+    # exec_path = "local_algo/true_andrei_algo"
 
     call_data = [
         exec_path,
@@ -177,11 +177,13 @@ def choose_placement(tenant, possible_placements, dict_dcs, dict_tenants, strate
         return True
 
     else:
-        # # no looking
+        # # for no looking
         # return False
 
         if delta_conditional == 0:
             return False
+
+        print("ACCEPTED")
 
         possible_dcs_names_conditional = [x[0] for x in possible_placements if len(x[2]) != 0]
         # possible_dcs_conditional = [dict_dcs[x] for x in possible_dcs_names_conditional]
