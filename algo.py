@@ -105,6 +105,8 @@ def algo_step(
     dict_dcs,
     dict_tenants
 ):
+    tenants = [x for x in tenants if x.mark is None]
+
     tenant_placements = dict()
 
     for dc in dcs:
