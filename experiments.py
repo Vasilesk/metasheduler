@@ -154,6 +154,21 @@ def iterations_view_returned(directory):
     ax = df.plot(kind='bar', stacked=True)
     ax.set_xlabel("Номер итерации")
     ax.set_ylabel("Возвращаемых запросов")
+
+    df_placed, _ = iterations_view_sent(directory)
+    df_placed = df_placed.query("mode=='placed'")
+
+    last_iteration = int(df.iloc[-1].name)
+    for i in range(last_iteration):
+        return_ok = df.iloc[i, 0]
+        return_fail = df.iloc[i, 1]
+        total_placed = df_placed.query("iteration=={}".format(i+1))["count"].sum()
+        print("итерация", i+1)
+        print("размещено за итерацию", total_placed)
+        print("возвращалось за итерацию", return_ok+return_fail)
+        print("из возвращаемых переназначены", return_ok)
+        print("-----")
+
     return df, ax
 
 def iterations_view_placed(directory):
