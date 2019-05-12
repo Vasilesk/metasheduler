@@ -1,0 +1,6 @@
+{
+	"dcs_per_tenant": 1,
+	"evaluator": "naive",
+	"tenant": "heaviest",
+	"dc": "random"
+}

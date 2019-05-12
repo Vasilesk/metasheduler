@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tenants>
+<tenant expiration_time="" name="45" tenant_type="">
+ <list_of_nodes>
+  <vm floating_ip="False" image_id="" name="305" service="1" x="83.887" y="90.056">
+   <connection_set number_of_ports="3">
+    <port name="305_port_0"/>
+    <port name="305_port_1"/>
+    <port name="305_port_2"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="7"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="11"/>
+   </parameter_set>
+  </vm>
+  <vm floating_ip="False" image_id="" name="306" service="1" x="27.0" y="44.621">
+   <connection_set number_of_ports="2">
+    <port name="306_port_0"/>
+    <port name="306_port_1"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="6"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="6"/>
+   </parameter_set>
+  </vm>
+  <vm floating_ip="False" image_id="" name="307" service="1" x="93.69" y="18.0">
+   <connection_set number_of_ports="2">
+    <port name="307_port_0"/>
+    <port name="307_port_1"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="2"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="14"/>
+   </parameter_set>
+  </vm>
+  <st name="308" service="1" x="109.56" y="158.75">
+   <connection_set number_of_ports="1">
+    <port name="308_port_0"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="size" parameter_type="real" parameter_value="246"/>
+   </parameter_set>
+  </st>
+ </list_of_nodes>
+ <list_of_links>
+  <link capacity="2" node1="305" node2="306" port1="305_port_0" port2="306_port_0" service="0"/>
+  <link capacity="53" node1="305" node2="307" port1="305_port_1" port2="307_port_0" service="0"/>
+  <link capacity="46" node1="305" node2="308" port1="305_port_2" port2="308_port_0" service="0"/>
+  <link capacity="10" node1="306" node2="307" port1="306_port_1" port2="307_port_1" service="0"/>
+ </list_of_links>
+</tenant>
+
+<tenant expiration_time="" name="604" tenant_type="">
+ <list_of_nodes>
+  <vm floating_ip="False" image_id="" name="4412" service="1" x="82.024" y="163.94">
+   <connection_set number_of_ports="3">
+    <port name="4412_port_0"/>
+    <port name="4412_port_1"/>
+    <port name="4412_port_2"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="4"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="4"/>
+   </parameter_set>
+  </vm>
+  <vm floating_ip="False" image_id="" name="4413" service="1" x="154.56" y="191.93">
+   <connection_set number_of_ports="1">
+    <port name="4413_port_0"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="2"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="7"/>
+   </parameter_set>
+  </vm>
+  <vm floating_ip="False" image_id="" name="4414" service="1" x="66.588" y="88.713">
+   <connection_set number_of_ports="2">
+    <port name="4414_port_0"/>
+    <port name="4414_port_1"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="2"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="9"/>
+   </parameter_set>
+  </vm>
+  <vm floating_ip="False" image_id="" name="4415" service="1" x="27.0" y="218.92">
+   <connection_set number_of_ports="1">
+    <port name="4415_port_0"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="5"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="9"/>
+   </parameter_set>
+  </vm>
+  <st name="4416" service="1" x="47.537" y="18.0">
+   <connection_set number_of_ports="1">
+    <port name="4416_port_0"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="size" parameter_type="real" parameter_value="223"/>
+   </parameter_set>
+  </st>
+ </list_of_nodes>
+ <list_of_links>
+  <link capacity="14" node1="4412" node2="4413" port1="4412_port_0" port2="4413_port_0" service="0"/>
+  <link capacity="9" node1="4412" node2="4414" port1="4412_port_1" port2="4414_port_0" service="0"/>
+  <link capacity="30" node1="4412" node2="4415" port1="4412_port_2" port2="4415_port_0" service="0"/>
+  <link capacity="31" node1="4414" node2="4416" port1="4414_port_1" port2="4416_port_0" service="0"/>
+ </list_of_links>
+</tenant>
+
+<tenant expiration_time="" name="1460" tenant_type="">
+ <list_of_nodes>
+  <vm floating_ip="False" image_id="" name="10678" service="1" x="70.84" y="89.879">
+   <connection_set number_of_ports="3">
+    <port name="10678_port_0"/>
+    <port name="10678_port_1"/>
+    <port name="10678_port_2"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="2"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="10"/>
+   </parameter_set>
+  </vm>
+  <vm floating_ip="False" image_id="" name="10679" service="1" x="138.24" y="62.326">
+   <connection_set number_of_ports="2">
+    <port name="10679_port_0"/>
+    <port name="10679_port_1"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="2"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="11"/>
+   </parameter_set>
+  </vm>
+  <vm floating_ip="False" image_id="" name="10680" service="1" x="81.752" y="18.0">
+   <connection_set number_of_ports="2">
+    <port name="10680_port_0"/>
+    <port name="10680_port_1"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="VCPUs" parameter_type="integer" parameter_value="6"/>
+    <parameter parameter_name="RAM" parameter_type="integer" parameter_value="14"/>
+   </parameter_set>
+  </vm>
+  <st name="10681" service="1" x="27.0" y="148.67">
+   <connection_set number_of_ports="1">
+    <port name="10681_port_0"/>
+   </connection_set>
+   <parameter_set>
+    <parameter parameter_name="size" parameter_type="real" parameter_value="428"/>
+   </parameter_set>
+  </st>
+ </list_of_nodes>
+ <list_of_links>
+  <link capacity="34" node1="10678" node2="10679" port1="10678_port_0" port2="10679_port_0" service="0"/>
+  <link capacity="44" node1="10678" node2="10680" port1="10678_port_1" port2="10680_port_0" service="0"/>
+  <link capacity="43" node1="10678" node2="10681" port1="10678_port_2" port2="10681_port_0" service="0"/>
+  <link capacity="24" node1="10679" node2="10680" port1="10679_port_1" port2="10680_port_1" service="0"/>
+ </list_of_links>
+</tenant>
+</tenants>

@@ -1,0 +1,6 @@
+{
+	"dcs_per_tenant": 8,
+	"evaluator": "sum",
+	"tenant": "heaviest",
+	"dc": "emptiest"
+}

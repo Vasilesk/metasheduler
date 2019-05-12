@@ -17,6 +17,113 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from functools import reduce
+import numpy as np
+
+def by_one_iterations_algo(directory):
+    map_evaluator = {
+        "naive": Evaluator_naive,
+        "sum": Evaluator_sum,
+        "detailed": Evaluator_detailed,
+    }
+    map_tenant = {
+        "random": get_tenants_random,
+        "heaviest": get_tenants_heaviest,
+        "lightest": get_tenants_lightest,
+    }
+    map_dc = {
+        "random": get_dcs_random,
+        "utilized": get_dcs_utilized,
+        "emptiest": get_dcs_emptiest,
+    }
+
+    filename_config = os.path.join(directory, "config.json")
+    with open(filename_config, "r") as f:
+        config = json.load(f)
+
+    dcs_per_tenant = config["dcs_per_tenant"]
+    e = map_evaluator[config["evaluator"]]()
+    strategy_choose_tenant = map_tenant[config["tenant"]]
+    strategy_choose_dc = map_dc[config["dc"]]
+
+    filenames = os.listdir(directory)
+    iterations = [int(x) for x in filenames if x.isdigit()]
+    last_iteration = max(iterations)
+    last_iteration_path = os.path.join(directory, str(last_iteration))
+
+    dcs, tenants_all = from_directory(last_iteration_path)
+
+    tenants_placed = [x for x in tenants_all if x .mark is not None]
+    # tenants_to_place = tenants_all[800+100*last_iteration:800+100*(last_iteration+1)]
+    tenants_to_place = tenants_all[800:]
+    tenants_in_process = tenants_placed + tenants_to_place
+
+    for tenant in tenants_in_process:
+        tenant.evaluation = e.get_tenant_evaluation(tenant)
+
+    dict_dcs = {dc.name : dc for dc in dcs}
+    dict_tenants = {tenant.name : tenant for tenant in tenants_in_process}
+
+    all_timings = []
+    all_sendings = []
+    all_returns = []
+    is_placed = []
+
+    start_time = time.time()
+    for i in range(len(tenants_to_place)):
+        all_placed, timings, sendings, returns_count = algo_step(
+            dcs_per_tenant,
+            dcs,
+            tenants_placed+[tenants_to_place[i]],
+            e,
+            strategy_choose_tenant,
+            strategy_choose_dc,
+            dict_dcs,
+            dict_tenants
+        )
+        all_timings.append(timings)
+        all_sendings.append(sendings)
+        all_returns.append(returns_count)
+        is_placed.append(all_placed)
+
+    elapsed_time = time.time() - start_time
+
+    returns_count = reduce(lambda x, y: {"yes": x["yes"] + y["yes"], "no": x["no"] + y["no"]}, all_returns, {'no': 0, 'yes': 0})
+    timings = np.array(all_timings).sum(axis=0).tolist()
+    # sendings = np.array(all_sendings).T.tolist()[0]
+    sendings = [[] for _ in range(8)]
+    for iteration in all_sendings:
+        for i, val in enumerate(iteration):
+            sendings[i].extend(val)
+
+    new_iteration_path = os.path.join(directory, str(last_iteration + 1))
+    os.mkdir(new_iteration_path)
+    into_directory(dcs, tenants_all, new_iteration_path)
+
+    filename_timings = os.path.join(directory, "timings.csv")
+    local_time = ",".join([str(x) if x is not None else "" for x in timings])
+    line = "{},{},{}\n".format(last_iteration+1, elapsed_time, local_time)
+    with open(filename_timings, "a") as f:
+        f.write(line)
+
+    filename_returns = os.path.join(directory, "returns.csv")
+    line = "{},{},{}\n".format(last_iteration+1, returns_count["yes"], returns_count["no"])
+    with open(filename_returns, "a") as f:
+        f.write(line)
+
+    filename_sendings = os.path.join(directory, "sendings.csv")
+    acceptings = []
+    for sending, dc in zip(sendings, dcs):
+        accepting = set(sending) - dc.names_rejected
+        acceptings.append(list(accepting))
+
+    line = [last_iteration+1, sendings, acceptings]
+
+    line = json.dumps(line) + "\n"
+
+    with open(filename_sendings, "a") as f:
+        f.write(line)
+
 def iterations_algo(directory):
     map_evaluator = {
         "naive": Evaluator_naive,

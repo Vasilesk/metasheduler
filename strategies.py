@@ -1,4 +1,6 @@
 import random
+random.seed(30031995)
+
 from evaluators import Evaluator_sum
 
 def get_tenants_random(tenants):
