@@ -53,9 +53,8 @@ def by_one_iterations_algo(directory):
 
     dcs, tenants_all = from_directory(last_iteration_path)
 
-    tenants_placed = [x for x in tenants_all if x .mark is not None]
-    # tenants_to_place = tenants_all[800+100*last_iteration:800+100*(last_iteration+1)]
-    tenants_to_place = tenants_all[800:]
+    tenants_placed = [x for x in tenants_all if x.mark is not None]
+    tenants_to_place = [x for x in tenants_all if x.mark is None][:67]
     tenants_in_process = tenants_placed + tenants_to_place
 
     for tenant in tenants_in_process:
