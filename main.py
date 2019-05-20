@@ -25,3 +25,5 @@ if __name__ == '__main__':
     print("tenants: {}/{}".format(tp["placed"], tp["total"]))
     ud = utilization_dcs(dcs)
     print("utilization: \navg {}\nmax {}".format(ud["avg"], ud["max"]))
+
+    into_directory(dcs, tenants, "examples/result_dcs_empty_sorted")

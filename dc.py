@@ -116,8 +116,8 @@ class DC:
                 rem = [x for x in rem if x in names_placed_before]
                 new_possible.append((bs, rem))
                 len_new = len(rem)
-                if len_new != len_old:
-                    print("smth was deleted, new len is", len_new)
+                # if len_new != len_old:
+                #     print("smth was deleted, new len is", len_new)
 
         self.tenants_try = []
 

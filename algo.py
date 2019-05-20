@@ -13,7 +13,7 @@ def scheduler_exec(data):
 
     f_prog = open("tmp/out_prog","wb")
 
-    exec_path = "local_algo/9_algo"
+    exec_path = "local_algo/algo"
     # exec_path = "local_algo/true_andrei_algo"
 
     call_data = [

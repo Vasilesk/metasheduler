@@ -1,0 +1,4 @@
+beautifulsoup4==4.7.1
+certifi==2019.3.9
+lxml==4.3.3
+soupsieve==1.9.1
